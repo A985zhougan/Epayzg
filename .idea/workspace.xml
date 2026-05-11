@@ -13,7 +13,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="zg" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -129,7 +129,7 @@
     <MESSAGE value="提交" />
     <MESSAGE value="提交测试" />
     <MESSAGE value="提交文件" />
-    <option name="LAST_COMMIT_MESSAGE" value="提交文件" />
+    <option name="LAST_COMMIT_MESSAGE" value="合并 zg：同步 IDE 配置与分支改动" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
