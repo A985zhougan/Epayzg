@@ -47,7 +47,8 @@ class Payment {
             return $result === 1;
         }else{
             $sign = self::makeSign($data, $md5key);
-            return $sign === $data['sign'];
+            // 异步通知里 sign 偶为大写 MD5，与 makeSign 小写结果不一致会导致验签失败、无法转发 Center
+            return strcasecmp((string) $sign, (string) $data['sign']) === 0;
         }
     }
 

@@ -153,19 +153,21 @@ $xsgMeta = [
     'money_cent'     => $moneyCent,
     'expand'         => $expand,
 ];
-$param = json_encode($xsgMeta, JSON_UNESCAPED_UNICODE);
-while (strlen($param) > 500 && $expandRaw !== '') {
+$paramJson = json_encode($xsgMeta, JSON_UNESCAPED_UNICODE);
+$param = 'XSG1' . base64_encode($paramJson);
+while (strlen($param) > 2000 && $expandRaw !== '') {
     $expandRaw = mb_strcut($expandRaw, 0, max(1, strlen($expandRaw) - 50), 'UTF-8');
     $expand = xsg_normalize_charge_params_json($expandRaw, $productId);
     if ($expand === '') {
         break;
     }
     $xsgMeta['expand'] = $expand;
-    $param = json_encode($xsgMeta, JSON_UNESCAPED_UNICODE);
+    $paramJson = json_encode($xsgMeta, JSON_UNESCAPED_UNICODE);
+    $param = 'XSG1' . base64_encode($paramJson);
 }
-if (strlen($param) > 500) {
+if (strlen($param) > 2000) {
     header('Content-Type: application/json; charset=UTF-8');
-    echo json_encode(['code' => -1, 'msg' => '易支付 param 限 500 字节，请缩短 extension'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['code' => -1, 'msg' => '充值扩展字段过长，请缩短 extension'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
