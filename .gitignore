@@ -1,0 +1,3 @@
+# 与 nginx 路径 epay/xsg_*.php 重复的根目录旧文件，勿纳入版本库
+/xsg_game_notify.php
+/xsg_unity_epay.php
