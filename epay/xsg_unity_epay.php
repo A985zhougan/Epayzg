@@ -196,7 +196,7 @@ $post = [
     'name'         => $name,
     'money'        => (string) $money,
     'clientip'     => $clientip,
-    'device'       => 'pc',
+    'device'       => isset($payload['payDevice']) ? (string) $payload['payDevice'] : 'mobile',
     'method'       => 'jump',
     'sitename'     => 'XSanGo',
     'param'        => $param,
@@ -233,29 +233,35 @@ if (!is_array($j)) {
     exit;
 }
 
-$payUrl = null;
-$payRedirectUrl = null;
-if (!empty($j['payurl']) && is_string($j['payurl'])) {
-    $payUrl = $j['payurl'];
-    // payurl（method=jump）本身就是跳转链接，Unity 客户端可打开此链接在浏览器完成支付
-    $payRedirectUrl = $j['payurl'];
-} elseif (!empty($j['pay_info']) && is_string($j['pay_info']) && (int) ($j['code'] ?? -1) === 0) {
+$code = isset($j['code']) ? (int) $j['code'] : -99;
+$tradeNo = isset($j['trade_no']) ? (string) $j['trade_no'] : '';
+$payurlRaw = (!empty($j['payurl']) && is_string($j['payurl'])) ? $j['payurl'] : null;
+$submitBase = rtrim((string) $siteurl, '/');
+$submitUrl = ($tradeNo !== '' && $submitBase !== '') ? $submitBase . '/pay/submit/' . $tradeNo . '/' : null;
+
+$payUrl = $payurlRaw ?: $submitUrl;
+if ($payUrl === null && !empty($j['pay_info']) && is_string($j['pay_info']) && ($code === 0 || $code === 1)) {
     $payUrl = $j['pay_info'];
-} elseif (!empty($j['qrcode']) && is_string($j['qrcode'])) {
+}
+if ($payUrl === null && !empty($j['qrcode']) && is_string($j['qrcode'])) {
     $payUrl = $j['qrcode'];
 }
 
-$code = isset($j['code']) ? (int) $j['code'] : -99;
 if ($payUrl && ($code === 0 || $code === 1)) {
     error_log('[xsg_unity_epay] order created ok out_trade_no=' . $out_trade_no . ' payUrl=' . $payUrl);
-    $resp = ['code' => 0, 'payUrl' => $payUrl, 'trade_no' => $j['trade_no'] ?? null];
-    if ($payRedirectUrl !== null) {
-        $resp['payRedirectUrl'] = $payRedirectUrl;
-    }
+    $resp = [
+        'code'           => 0,
+        'payUrl'         => $payUrl,
+        'payurl'         => $payUrl,
+        'payRedirectUrl' => $payUrl,
+        'payredirecturl' => $payUrl,
+        'url'            => $payUrl,
+        'trade_no'       => $tradeNo !== '' ? $tradeNo : ($j['trade_no'] ?? null),
+    ];
     echo json_encode($resp, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 $msg = isset($j['msg']) ? (string) $j['msg'] : '无法解析支付地址';
-error_log('[xsg_unity_epay] order failed out_trade_no=' . $out_trade_no . ' msg=' . $msg);
+error_log('[xsg_unity_epay] order failed out_trade_no=' . $out_trade_no . ' msg=' . $msg . ' mapi=' . substr(json_encode($j), 0, 300));
 echo json_encode(['code' => -1, 'msg' => $msg, 'raw' => $j], JSON_UNESCAPED_UNICODE);
